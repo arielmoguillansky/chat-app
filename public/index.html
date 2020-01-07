@@ -7,20 +7,20 @@
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" href="./img/favicon.png">
-	<link rel="stylesheet" href="./css/styles.min.css">
+	<link rel="stylesheet" href="./css/styles.css">
 
 </head>
 
 <body>
 	<div class="centered-form">
 		<div class="centered-form__box">
-			<h1>Join</h1>
+			<h1 class="form-title">prompt chat</h1>
 			<form action="/chat.html">
-				<label for="userName">Display name</label>
-				<input type="text" name="userName" placeholder="Display name" required>
-				<label for="roomName">Room</label>
-				<input type="text" name="roomName" placeholder="Room" required>
-				<button>Join</button>
+				<label for="userName">type &#60;user name&#62;:</label>
+				<input type="text" name="userName" id="userInput" required>
+				<label for="roomName">type &#60;room&#62;:</label>
+				<input type="text" name="roomName" required>
+				<button>\>run</button>
 			</form>
 		</div>
 	</div>

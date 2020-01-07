@@ -19,7 +19,7 @@ const publicDir = path.join(__dirname, '../public');
 
 app.use(express.static(publicDir));
 
-const welcomeMsg = 'Welcome to this chat';
+const welcomeMsg = ', welcome to this chat';
 const joinMsg = ' has joined the chat';
 const discMsg = ' has left the chat';
 
@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
 		const user = removeUser(socket.id);
 
 		if (user) {
-			io.to(user.roomName).emit('disc-message', generateMsg(user.userName + discMsg));
+			io.to(user.roomName).emit('disc-message', generateMsg(user.userName, discMsg));
 			io.to(user.roomName).emit('roomData', {
 				roomName: user.roomName,
 				users: getUsersByRoom(user.roomName)
@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 		socket.join(user.roomName);
 
 		socket.emit('welcome-message', generateMsg(user.userName, welcomeMsg));
-		socket.broadcast.to(user.roomName).emit('join-message', generateMsg(user.userName + joinMsg));
+		socket.broadcast.to(user.roomName).emit('join-message', generateMsg(user.userName, joinMsg));
 		io.to(user.roomName).emit('roomData', {
 			roomName: user.roomName,
 			users: getUsersByRoom(user.roomName)

@@ -16,5 +16,5 @@ const generateUrlMsg = (userName, url) => {
 
 module.exports = {
 	generateMsg,
-	generateUrlMsg
+	generateUrlMsg,
 }

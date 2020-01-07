@@ -3,16 +3,20 @@ const socket = io();
 //elements
 const msgForm = document.querySelector('#msg-form');
 const msgInput = document.querySelector('input[name="msg"]');
-const msgFormBtn = document.querySelector('.send-btn');
-const msgLocBtn = document.querySelector('.send-loc-btn');
+const msgFormBtn = document.querySelector('.send-btn-icon');
+const msgLocBtn = document.querySelector('.loc-btn-icon');
 const msgDiv = document.querySelector('#msg');
 const sideBarDiv = document.querySelector('.chat__sidebar');
 
 //Templates
 const msgTemplate = document.querySelector('#message-template').innerHTML;
+const otherMsgTemplate = document.querySelector('#other-message-template').innerHTML;
 const locTemplate = document.querySelector('#location-template').innerHTML;
+const otherLocTemplate = document.querySelector('#other-location-template').innerHTML;
 const welcomeTemplate = document.querySelector('#welcome-template').innerHTML;
 const sideBarTemplate = document.querySelector('#sidebar-template').innerHTML;
+const joinTemplate = document.querySelector('#join-template').innerHTML;
+const leftTemplate = document.querySelector('#left-template').innerHTML;
 
 //Options
 const { userName, roomName } = Qs.parse(location.search, { ignoreQueryPrefix: true });
@@ -42,7 +46,7 @@ const autoScroll = () => {
 	//Distance of scrolling
 	const scrollOffset = msgDiv.scrollTop + visibleHeight;
 
-	if (contentHeight - newMsgHeight <= scrollOffset) {
+	if (contentHeight - newMsgHeight >= scrollOffset) {
 		msgDiv.scrollTop = msgDiv.scrollHeight;
 	}
 
@@ -51,7 +55,7 @@ const autoScroll = () => {
 
 msgInput.addEventListener('keyup', (e) => {
 	const input = e.target.value;
-	(input === '') ? (msgFormBtn.disabled = true) : (msgFormBtn.disabled = false)
+	(input === '') ? (msgFormBtn.classList.add('no-send')) : (msgFormBtn.classList.remove('no-send'))
 })
 
 
@@ -59,12 +63,24 @@ msgInput.addEventListener('keyup', (e) => {
 
 
 socket.on('chat-message', (message) => {
-	const html = Mustache.render(msgTemplate, {
-		userName: toUpperCase(message.userName),
-		message: message.text,
-		msgCreatedAt: moment(message.createdAt).calendar()
-	})
-	msgDiv.insertAdjacentHTML('beforeend', html);
+	const currentUser = { userName }
+	if (currentUser.userName === toUpperCase(message.userName)) {
+
+		const html = Mustache.render(otherMsgTemplate, {
+			userName: toUpperCase(message.userName),
+			message: message.text,
+			msgCreatedAt: moment(message.createdAt).format('h:mm')
+		})
+
+		msgDiv.insertAdjacentHTML('beforeend', html);
+	} else {
+		const html = Mustache.render(msgTemplate, {
+			userName: toUpperCase(message.userName),
+			message: message.text,
+			msgCreatedAt: moment(message.createdAt).format('h:mm')
+		})
+		msgDiv.insertAdjacentHTML('beforeend', html);
+	}
 	autoScroll();
 })
 
@@ -79,7 +95,8 @@ socket.on('welcome-message', (welcomeMsg) => {
 
 socket.on('join-message', (joinMsg) => {
 	console.log(joinMsg);
-	const html = Mustache.render(welcomeTemplate, {
+	const html = Mustache.render(joinTemplate, {
+		joinedUser: toUpperCase(joinMsg.userName),
 		joinMsg: joinMsg.text,
 		joinedAt: moment(joinMsg.createdAt).format('h:mm a')
 	})
@@ -88,7 +105,8 @@ socket.on('join-message', (joinMsg) => {
 
 socket.on('disc-message', (leftMsg) => {
 	console.log(leftMsg);
-	const html = Mustache.render(welcomeTemplate, {
+	const html = Mustache.render(leftTemplate, {
+		leftUser: toUpperCase(leftMsg.userName),
 		leftMsg: leftMsg.text,
 		leftAt: moment(leftMsg.createdAt).format('h:mm a')
 	})
@@ -104,11 +122,11 @@ msgForm.addEventListener('submit', (e) => {
 
 	socket.emit('user-msg', userMsg, (error) => {
 
-		setTimeout(() => {
-			msgFormBtn.removeAttribute('disabled');
-			msgInput.value = '';
-			msgInput.focus();
-		}, 500)
+
+		msgFormBtn.removeAttribute('disabled');
+		msgInput.value = '';
+		msgInput.focus();
+
 
 		if (error) return console.log(error)
 
@@ -137,13 +155,22 @@ msgLocBtn.addEventListener('click', (e) => {
 })
 
 socket.on('sendLoc', (url) => {
-
-	const html = Mustache.render(locTemplate, {
-		url: url.url,
-		createdAt: moment(url.createdAt).calendar(),
-		userName: toUpperCase(url.userName)
-	})
-	msgDiv.insertAdjacentHTML('beforeend', html);
+	const currentUser = { userName }
+	if (currentUser.userName === toUpperCase(url.userName)) {
+		const html = Mustache.render(otherLocTemplate, {
+			url: url.url,
+			createdAt: moment(url.createdAt).calendar(),
+			userName: toUpperCase(url.userName)
+		})
+		msgDiv.insertAdjacentHTML('beforeend', html);
+	} else {
+		const html = Mustache.render(locTemplate, {
+			url: url.url,
+			createdAt: moment(url.createdAt).calendar(),
+			userName: toUpperCase(url.userName)
+		})
+		msgDiv.insertAdjacentHTML('beforeend', html);
+	}
 	autoScroll();
 })
 
